@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Admin – Permissions{% endblock %}</title>
+    <link rel="stylesheet" href="/static/admin.css" />
+  </head>
+  <body>
+    {% extends "base.html" %} {% block content %}
+    <h2>Права</h2>
+    <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Описание</th>
+          <th>Ресурс</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for perm in permissions %}
+        <tr>
+          <td>{{ perm.id }}</td>
+          <td>{{ perm.name }}</td>
+          <td>{{ perm.description or "" }}</td>
+          <td>{{ perm.resource_id or "" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p>
+      Эта страница показывает все права доступа. Вы можете просматривать и
+      изменять их, назначая ресурсы и описания.
+    </p>
+    {% endblock %}
+  </body>
+</html>

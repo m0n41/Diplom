@@ -1,0 +1,46 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+header {
+  background-color: #003366;
+  color: white;
+  padding: 1rem;
+}
+nav a {
+  color: #ffc107;
+  margin-right: 1rem;
+  text-decoration: none;
+}
+.admin-return-button {
+  display: inline-block;
+  margin: 1rem 0;
+  padding: 0.5rem 1rem;
+  background-color: #003366;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+}
+.admin-return-button:hover {
+  background-color: #002244;
+}
+main {
+  padding: 2rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+  text-align: left;
+}
+th {
+  background-color: #003366;
+  color: white;
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Admin – Roles{% endblock %}</title>
+    <link rel="stylesheet" href="/static/admin.css" />
+  </head>
+  <body>
+    {% extends "base.html" %} {% block content %}
+    <h2>Роли</h2>
+    <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Название</th>
+          <th>Описание</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for role in roles %}
+        <tr>
+          <td>{{ role.id }}</td>
+          <td>{{ role.name }}</td>
+          <td>{{ role.description or "" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p>
+      Здесь отображаются все роли системы. Вы можете просматривать их детали и
+      управлять ролями через соответствующие действия.
+    </p>
+    {% endblock %}
+  </body>
+</html>

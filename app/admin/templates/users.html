@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Admin – Users{% endblock %}</title>
+    <link rel="stylesheet" href="/static/admin.css" />
+  </head>
+  <body>
+    {% extends "base.html" %} {% block content %}
+    <h2>Пользователи</h2>
+    <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Email</th>
+          <th>Активен</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ "Да" if user.is_active else "Нет" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endblock %}
+  </body>
+</html>

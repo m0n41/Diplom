@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Admin – Audit Log{% endblock %}</title>
+    <link rel="stylesheet" href="/static/admin.css" />
+  </head>
+  <body>
+    {% extends "base.html" %} {% block content %}
+    <h2>Журнал аудита</h2>
+    <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Время</th>
+          <th>Пользователь</th>
+          <th>Действие</th>
+          <th>Ресурс</th>
+          <th>Решение</th>
+          <th>Причина отказа</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ev in events %}
+        <tr>
+          <td>{{ ev.id }}</td>
+          <td>{{ ev.timestamp }}</td>
+          <td>{{ ev.user_id }}</td>
+          <td>{{ ev.action }}</td>
+          <td>{{ ev.resource_id or "" }}</td>
+          <td>{{ ev.decision }}</td>
+          <td>{{ ev.deny_reason or "" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p>
+      Журнал аудита фиксирует все действия пользователей и системные события.
+      Используйте его для анализа безопасности и отладки.
+    </p>
+    {% endblock %}
+  </body>
+</html>
