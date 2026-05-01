@@ -14,7 +14,12 @@
         <a href="/admin/audit">Audit Log</a>
       </nav>
     </header>
-    <main>{% block content %}{% endblock %}</main>
+    <main>
+      <div style="text-align: right; margin-bottom: 10px">
+        <a href="/admin/logout">Выйти</a>
+      </div>
+      {% block content %}{% endblock %}
+    </main>
     <footer>
       <p>&copy; 2026 MyProject</p>
     </footer>

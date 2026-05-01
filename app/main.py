@@ -1,5 +1,6 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer
 from fastapi.templating import Jinja2Templates
@@ -56,6 +57,21 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi
+
+
+# Global exception handler for admin authentication errors
+@app.exception_handler(HTTPException)
+async def admin_auth_exception_handler(request: Request, exc: HTTPException):
+    """
+    Redirect unauthenticated or unauthorized admin requests to the login page.
+    """
+    if request.url.path.startswith("/admin") and exc.status_code in {401, 403}:
+        # Pass the error message as a query parameter for display on the login page
+        error_msg = exc.detail.replace(" ", "%20")
+        return RedirectResponse(url=f"/admin/login?error={error_msg}")
+    # Default handling for other HTTP exceptions
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 
 # Mount static files for admin UI (CSS/JS)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

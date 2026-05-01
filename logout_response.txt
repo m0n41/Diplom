@@ -1,0 +1,8 @@
+Текущая кодовая страница: 1251
+HTTP/1.1 307 Temporary Redirect
+date: Thu, 30 Apr 2026 22:45:56 GMT
+server: uvicorn
+content-length: 0
+location: /admin/login
+set-cookie: access_token=""; expires=Thu, 30 Apr 2026 22:45:57 GMT; Max-Age=0; Path=/admin; SameSite=lax
+
