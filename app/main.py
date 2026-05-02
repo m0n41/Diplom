@@ -14,6 +14,7 @@ from app.identity.routes import router as identity_router
 from app.access.routes import router as access_router
 from app.audit.routes import router as audit_router
 from app.admin.routes import router as admin_router
+from app.demo.routes import router as demo_router
 
 templates = Jinja2Templates(directory="app/admin/templates")
 
@@ -79,7 +80,7 @@ async def admin_auth_exception_handler(request: Request, exc: HTTPException):
     """
     Redirect unauthenticated or unauthorized admin requests to the login page.
     """
-    if request.url.path.startswith("/admin") and exc.status_code in {401, 403}:
+    if request.url.path.startswith(("/admin", "/demo")) and exc.status_code in {401, 403}:
         # Pass the error message as a query parameter for display on the login page
         error_msg = exc.detail.replace(" ", "%20")
         return RedirectResponse(url=f"/admin/login?error={error_msg}")
@@ -99,6 +100,7 @@ app.include_router(identity_router, prefix="/identity", tags=["identity"])
 app.include_router(access_router, prefix="/access", tags=["access"])
 app.include_router(audit_router, prefix="/audit", tags=["audit"])
 app.include_router(admin_router, prefix="/admin", tags=["admin"])
+app.include_router(demo_router, prefix="/demo", tags=["demo"])
 
 
 @app.get("/health", tags=["monitoring"])

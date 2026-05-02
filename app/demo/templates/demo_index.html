@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Portal — Dashboard</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; }
+.header { background: #285c9b; color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; }
+.header .user-info { font-size: 14px; }
+.header a { color: #fff; text-decoration: none; margin-left: 16px; font-size: 14px; }
+.header a:hover { text-decoration: underline; }
+.container { max-width: 900px; margin: 32px auto; padding: 0 16px; }
+.card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 24px; }
+.card h2 { font-size: 18px; margin-bottom: 12px; color: #1a1a1a; }
+.card p { color: #555; font-size: 14px; margin-bottom: 8px; }
+.resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+.resource-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: center; transition: box-shadow 0.2s; }
+.resource-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.resource-card h3 { font-size: 16px; margin-bottom: 8px; color: #285c9b; }
+.resource-card p { font-size: 13px; color: #777; margin-bottom: 12px; }
+.resource-card a { display: inline-block; padding: 8px 20px; background: #285c9b; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; }
+.resource-card a:hover { background: #1e4a7d; }
+.badge { display: inline-block; padding: 2px 8px; background: #e3f2fd; color: #285c9b; border-radius: 4px; font-size: 12px; margin-right: 6px; }
+</style>
+</head>
+<body>
+<div class="header">
+<div>
+<h1>🏢 Демо корпоративный портал</h1>
+</div>
+<div class="user-info">
+Вы вошли как: <strong>{{ user.username }}</strong>
+| Роли:
+{% for role in roles %}<span class="badge">{{ role }}</span>{% endfor %}
+<a href="/demo/logout">Выйти</a>
+</div>
+</div>
+<div class="container">
+<div class="card">
+<h2>Добро пожаловать, {{ user.username }}!</h2>
+<p>Этот портал демонстрирует ролевое и атрибутное управление доступом.</p>
+<p>Ваши роли определяют, к каким ресурсам у вас есть доступ. Также применяются ABAC-правила (временное окно, фильтр IP).</p>
+</div>
+<div class="card">
+<h2>Доступные ресурсы</h2>
+<div class="resources">
+<div class="resource-card">
+<h3>📄 Документы</h3>
+<p>Корпоративные документы и политики</p>
+<a href="/demo/documents">Открыть</a>
+</div>
+<div class="resource-card">
+<h3>💰 Финансы</h3>
+<p>Бюджеты и финансовые отчёты</p>
+<a href="/demo/finance">Открыть</a>
+</div>
+<div class="resource-card">
+<h3>👥 HR</h3>
+<p>Кадровые записи сотрудников</p>
+<a href="/demo/hr">Открыть</a>
+</div>
+</div>
+</div>
+<div class="card">
+<h2>Как это работает</h2>
+<p>1. Система проверяет ваши <strong>роли</strong> и <strong>права</strong> (RBAC).</p>
+<p>2. Затем проверяет <strong>ABAC-условия</strong>: рабочее время (08:00–18:00 UTC) и IP-адрес.</p>
+<p>3. Каждая попытка доступа записывается в <a href="/admin/audit" target="_blank">журнал аудита</a>.</p>
+</div>
+</div>
+</body>
+</html>

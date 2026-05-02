@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Portal — Access Denied</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; }
+.header { background: #285c9b; color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; }
+.header h1 { font-size: 20px; }
+.header a { color: #fff; text-decoration: none; margin-left: 16px; font-size: 14px; }
+.header a:hover { text-decoration: underline; }
+.container { max-width: 600px; margin: 64px auto; padding: 0 16px; text-align: center; }
+.denied-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 48px 32px; }
+.denied-icon { font-size: 64px; margin-bottom: 16px; }
+.denied-card h2 { font-size: 24px; color: #c33; margin-bottom: 12px; }
+.denied-card p { color: #555; font-size: 15px; margin-bottom: 8px; }
+.reason-box { background: #fff3e0; border-left: 4px solid #ff9800; padding: 16px; margin: 20px 0; text-align: left; border-radius: 0 6px 6px 0; }
+.reason-box strong { color: #e65100; }
+.btn { display: inline-block; margin-top: 20px; padding: 10px 24px; background: #285c9b; color: #fff; text-decoration: none; border-radius: 6px; font-size: 15px; }
+.btn:hover { background: #1e4a7d; }
+</style>
+</head>
+<body>
+<div class="header">
+<div>
+<h1>🏢 Демо корпоративный портал</h1>
+</div>
+<div>
+<a href="/demo">Панель управления</a>
+<a href="/demo/logout">Выйти</a>
+</div>
+</div>
+<div class="container">
+<div class="denied-card">
+<div class="denied-icon">🚫</div>
+<h2>Доступ запрещён</h2>
+<p>У вас нет прав для доступа к <strong>{{ resource_name }}</strong>.</p>
+<div class="reason-box">
+<p><strong>Причина отказа:</strong> {{ deny_reason }}</p>
+<p style="font-size:13px;color:#777;margin-top:8px;">
+Это решение принято точкой принятия решений (PDP) на основе ваших ролей и ABAC-атрибутов.
+</p>
+</div>
+<p style="font-size:13px;color:#777;">
+Каждая попытка доступа записывается в журнал. Вы можете просмотреть аудит в <a href="/admin/audit" target="_blank" style="color:#285c9b;">панели администратора</a>.
+</p>
+<a href="/demo" class="btn">← Назад в панель управления</a>
+</div>
+</div>
+</body>
+</html>
