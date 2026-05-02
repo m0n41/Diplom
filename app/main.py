@@ -17,6 +17,20 @@ from app.admin.routes import router as admin_router
 
 templates = Jinja2Templates(directory="app/admin/templates")
 
+
+def _msk_time_filter(value):
+    """Convert datetime to Moscow time (UTC+3) for display."""
+    if value is None:
+        return ""
+    from datetime import timezone, timedelta
+    msk = timezone(timedelta(hours=3))
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(msk).strftime("%Y-%m-%d %H:%M:%S")
+
+
+templates.env.filters["msk_time"] = _msk_time_filter
+
 app = FastAPI(
     title="Automated Information System for Authentication and Access Control with Centralized Audit",
     version="0.1.0",

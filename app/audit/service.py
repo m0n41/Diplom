@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
 from sqlalchemy.orm import Session
@@ -23,7 +23,7 @@ def log_audit_event(
     This function never raises – any DB error is caught and ignored to avoid breaking the main flow.
     """
     event = AuditEvent(
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         user_id=user_id,
         action=action,
         resource_id=resource_id,

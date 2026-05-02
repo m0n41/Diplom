@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>Создать ресурс</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>Создать ресурс</h2>
+<p><a class="admin-return-button" href="/admin/resources">&larr; Назад к списку</a></p>
+
+{% if request.query_params.get('error') %}
+<div style="padding:10px;background:#f8d7da;color:#721c24;margin-bottom:15px;border-radius:4px;">&#10060; {{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<form method="post" action="/admin/resources/create">
+<label for="name">Название:</label><br/>
+<input type="text" id="name" name="name" required/><br/><br/>
+
+<label for="category">Категория:</label><br/>
+<input type="text" id="category" name="category" required placeholder="например: files, users, reports"/><br/><br/>
+
+<label for="criticality">Критичность (1-5):</label><br/>
+<input type="number" id="criticality" name="criticality" min="1" max="5" value="1"/><br/><br/>
+
+<button type="submit">Создать</button>
+</form>
+{% endblock %}
+</body>
+</html>

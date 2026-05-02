@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any, Dict
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.config import settings
@@ -63,7 +63,7 @@ def _store_refresh_token(db: Session, user: User, token: str) -> RefreshToken:
 
 
 @router.post("/login", response_model=TokenResponse, tags=["auth"])
-def login(payload: LoginRequest, db: Session = Depends(get_db)):
+def login(request: Request, payload: LoginRequest, db: Session = Depends(get_db)):
     # Brute‑force check
     _check_brute_force(payload.username)
 
@@ -104,14 +104,17 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+        },
     )
 
     return TokenResponse(access_token=access_token, refresh_token=refresh_token)
 
 
 @router.post("/refresh", response_model=TokenResponse, tags=["auth"])
-def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
+def refresh(request: Request, payload: RefreshRequest, db: Session = Depends(get_db)):
     possible_tokens = (
         db.query(RefreshToken).filter(RefreshToken.revoked == False).all()  # noqa: E712
     )
@@ -156,14 +159,17 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+        },
     )
 
     return TokenResponse(access_token=new_access, refresh_token=payload.refresh_token)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT, tags=["auth"])
-def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
+def logout(request: Request, payload: LogoutRequest, db: Session = Depends(get_db)):
     possible_tokens = (
         db.query(RefreshToken).filter(RefreshToken.revoked == False).all()  # noqa: E712
     )
@@ -191,5 +197,8 @@ def logout(payload: LogoutRequest, db: Session = Depends(get_db)):
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+        },
     )

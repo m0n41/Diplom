@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>{% block title %}Админ &ndash; Политики доступа{% endblock %}</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>Политики доступа (ABAC)</h2>
+<p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+
+<p style="margin-bottom:20px;">
+  Эта страница показывает <strong>ABAC-политики</strong> (Attribute-Based Access Control),
+  реализованные в системе. ABAC-предикаты работают поверх RBAC и могут только <em>запрещать</em> доступ —
+  никогда не разрешать его сверх того, что уже разрешено ролями.
+</p>
+
+<table>
+<thead>
+<tr style="background:#f0f0f0;">
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Название политики</th>
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Описание</th>
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Тип</th>
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Статус</th>
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Условие</th>
+<th style="border:1px solid #ccc;padding:8px;text-align:left;">Источник</th>
+</tr>
+</thead>
+<tbody>
+{% for policy in policies %}
+<tr>
+<td style="border:1px solid #ccc;padding:8px;font-weight:bold;">{{ policy.name }}</td>
+<td style="border:1px solid #ccc;padding:8px;">{{ policy.description }}</td>
+<td style="border:1px solid #ccc;padding:8px;"><span style="background:#e3f2fd;padding:2px 6px;border-radius:3px;">{{ policy.type }}</span></td>
+<td style="border:1px solid #ccc;padding:8px;"><span style="color:green;font-weight:bold;">{{ policy.status }}</span></td>
+<td style="border:1px solid #ccc;padding:8px;font-family:monospace;font-size:12px;background:#f9f9f9;">{{ policy.condition }}</td>
+<td style="border:1px solid #ccc;padding:8px;font-family:monospace;font-size:11px;color:#666;">{{ policy.source }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<h3 style="margin-top:30px;">Пример политик в формате JSON</h3>
+<p>Так выглядят ABAC-правила при экспорте или интеграции с внешними системами:</p>
+<pre style="background:#263238;color:#aed581;padding:15px;border-radius:6px;overflow-x:auto;font-family:monospace;font-size:13px;line-height:1.5;">{{ json_example }}</pre>
+
+<div style="margin-top:20px;padding:15px;background:#fff3e0;border-left:4px solid #ff9800;">
+  <strong>Как это работает:</strong>
+  <ol style="margin:10px 0 0 20px;">
+    <li>Пользователь проходит аутентификацию (JWT-токен)</li>
+    <li>PDP проверяет RBAC: есть ли у пользователя нужная роль/право?</li>
+    <li>Затем PDP проверяет ABAC-предикаты: время, IP-адрес и др.</li>
+    <li>Если хотя бы один ABAC-предикат вернул <code>False</code> — доступ <strong>DENY</strong></li>
+    <li>Только если RBAC = PERMIT <em>и</em> все ABAC = PERMIT — доступ разрешён</li>
+  </ol>
+</div>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8" /><title>{% if permission %}Edit{% else %}Create{% endif %} Permission</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>{% if permission %}Edit{% else %}Create{% endif %} Permission</h2>
+<p><a class="admin-return-button" href="/admin/permissions">&larr; Back</a></p>
+{% if request.query_params.get('error') %}
+<div style="padding:10px;background:#f8d7da;color:#721c24;margin-bottom:15px;border-radius:4px;">&#10060; {{ request.query_params.get('error') }}</div>
+{% endif %}
+<form method="post" action="{% if permission %}/admin/permissions/{{ permission.id }}/edit{% else %}/admin/permissions/create{% endif %}">
+<label for="name">Action:</label><br/>
+<input type="text" id="name" name="name" required value="{{ permission.action if permission else '' }}"/><br/><br/>
+<label for="description">Description:</label><br/>
+<textarea id="description" name="description" rows="4" cols="50">{{ permission.description if permission else '' }}</textarea><br/><br/>
+<label for="resource_id">Resource:</label><br/>
+<select id="resource_id" name="resource_id" required>
+<option value="">-- Select resource --</option>
+{% for res in resources %}
+<option value="{{ res.id }}" {% if permission and permission.resource_id == res.id %}selected{% endif %}>{{ res.name }}</option>
+{% endfor %}
+</select><br/><br/>
+<button type="submit">{% if permission %}Save{% else %}Create{% endif %}</button>
+</form>
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>{% block title %}Админ &ndash; Ресурсы{% endblock %}</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>Ресурсы</h2>
+<p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+
+{% if request.query_params.get('success') %}
+<div style="padding:10px;background:#d4edda;color:#155724;margin-bottom:15px;border-radius:4px;">&#9989; {{ request.query_params.get('success') }}</div>
+{% endif %}
+{% if request.query_params.get('error') %}
+<div style="padding:10px;background:#f8d7da;color:#721c24;margin-bottom:15px;border-radius:4px;">&#10060; {{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<table>
+<thead>
+<tr><th>ID</th><th>Название</th><th>Категория</th><th>Критичность</th><th>Кол-во прав</th></tr>
+</thead>
+<tbody>
+{% for res in resources %}
+<tr>
+<td>{{ res.id }}</td>
+<td>{{ res.name }}</td>
+<td>{{ res.category }}</td>
+<td>{{ res.criticality }}</td>
+<td>{{ res.perm_count }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<p><a href="/admin/resources/create">Добавить ресурс</a></p>
+<p>Ресурсы — это сущности, к которым применяются права доступа. Без ресурса нельзя создать право.</p>
+{% endblock %}
+</body>
+</html>

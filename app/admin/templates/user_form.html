@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>{% if user %}Редактировать пользователя{% else %}Создать пользователя{% endif %}</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>{% if user %}Редактировать пользователя{% else %}Создать пользователя{% endif %}</h2>
+<p><a class="admin-return-button" href="/admin/users">&larr; Назад к списку</a></p>
+
+{% if request.query_params.get('error') %}
+<div style="padding:10px;background:#f8d7da;color:#721c24;margin-bottom:15px;border-radius:4px;">&#10060; {{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<form method="post" action="{% if user %}/admin/users/{{ user.id }}/edit{% else %}/admin/users/create{% endif %}">
+<label for="username">Имя пользователя:</label><br/>
+<input type="text" id="username" name="username" required value="{{ user.username if user else '' }}"/><br/><br/>
+
+<label for="email">Email:</label><br/>
+<input type="email" id="email" name="email" required value="{{ user.email if user else '' }}"/><br/><br/>
+
+{% if not user %}
+<label for="password">Пароль:</label><br/>
+<input type="password" id="password" name="password" required/><br/><br/>
+{% endif %}
+
+{% if user %}
+<label for="is_active">Активен:</label>
+<input type="checkbox" id="is_active" name="is_active" value="true" {% if user.is_active %}checked{% endif %}/><br/><br/>
+
+<fieldset style="border:1px solid #ccc;padding:10px;margin-bottom:15px;">
+<legend><strong>Назначенные роли</strong></legend>
+{% if all_roles %}
+{% for role in all_roles %}
+<label style="display:block;margin:5px 0;">
+<input type="checkbox" name="role_ids" value="{{ role.id }}" {% if role.id|string in user_role_ids %}checked{% endif %}/>
+{{ role.name }}{% if role.description %} <small style="color:#666;">({{ role.description }})</small>{% endif %}
+</label>
+{% endfor %}
+{% else %}
+<p style="color:#999;">Нет доступных ролей. <a href="/admin/roles/create">Создать роль</a></p>
+{% endif %}
+</fieldset>
+{% endif %}
+
+<button type="submit">{% if user %}Сохранить изменения{% else %}Создать{% endif %}</button>
+</form>
+{% endblock %}
+</body>
+</html>

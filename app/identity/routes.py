@@ -86,6 +86,7 @@ def list_users(
 
 @router.post("/users", response_model=UserRead, tags=["identity"])
 def create_user(
+    request: Request,
     user_in: UserCreate,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -105,18 +106,23 @@ def create_user(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="create_user",
+        action="user_created",
         resource_id=str(new_user.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "username": user_in.username,
+        },
     )
     return new_user
 
 
 @router.put("/users/{user_id}", response_model=UserRead, tags=["identity"])
 def update_user(
+    request: Request,
     user_id: str,
     user_in: UserUpdate,
     db: Session = Depends(get_db),
@@ -141,12 +147,15 @@ def update_user(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="update_user",
+        action="user_updated",
         resource_id=str(user.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+        },
     )
     return user
 
@@ -155,6 +164,7 @@ def update_user(
     "/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["identity"]
 )
 def delete_user(
+    request: Request,
     user_id: str,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -172,12 +182,15 @@ def delete_user(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="delete_user",
+        action="user_deactivated",
         resource_id=str(user.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"ip_address": "N/A", "client_type": "N/A"},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+        },
     )
     return
 
@@ -191,6 +204,7 @@ def list_roles(db: Session = Depends(get_db), payload: dict = Depends(_admin_req
 
 @router.post("/roles", response_model=RoleRead, tags=["identity"])
 def create_role(
+    request: Request,
     role_in: RoleCreate,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -211,12 +225,16 @@ def create_role(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="create_role",
+        action="role_created",
         resource_id=str(new_role.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"role_name": role_in.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "role_name": role_in.name,
+        },
     )
     return new_role
 
@@ -281,6 +299,7 @@ def test_abac(
 
 @router.put("/roles/{role_id}", response_model=RoleRead, tags=["identity"])
 def update_role(
+    request: Request,
     role_id: str,
     role_in: RoleUpdate,
     db: Session = Depends(get_db),
@@ -313,12 +332,16 @@ def update_role(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="update_role",
+        action="role_updated",
         resource_id=str(role.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"role_name": role.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "role_name": role.name,
+        },
     )
     return role
 
@@ -327,6 +350,7 @@ def update_role(
     "/roles/{role_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["identity"]
 )
 def delete_role(
+    request: Request,
     role_id: str,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -349,12 +373,16 @@ def delete_role(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="delete_role",
+        action="role_deleted",
         resource_id=str(role.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"role_name": role.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "role_name": role.name,
+        },
     )
 
 
@@ -369,6 +397,7 @@ def list_resources(
 
 @router.post("/resources", response_model=ResourceRead, tags=["identity"])
 def create_resource(
+    request: Request,
     resource_in: ResourceCreate,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -386,12 +415,16 @@ def create_resource(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="create_resource",
+        action="resource_created",
         resource_id=str(new_resource.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"resource_name": resource_in.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "resource_name": resource_in.name,
+        },
     )
     return new_resource
 
@@ -413,6 +446,7 @@ def get_resource(
 
 @router.put("/resources/{resource_id}", response_model=ResourceRead, tags=["identity"])
 def update_resource(
+    request: Request,
     resource_id: str,
     resource_in: ResourceUpdate,
     db: Session = Depends(get_db),
@@ -438,12 +472,16 @@ def update_resource(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="update_resource",
+        action="resource_updated",
         resource_id=str(resource.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"resource_name": resource.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "resource_name": resource.name,
+        },
     )
     return resource
 
@@ -454,6 +492,7 @@ def update_resource(
     tags=["identity"],
 )
 def delete_resource(
+    request: Request,
     resource_id: str,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -475,12 +514,16 @@ def delete_resource(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="delete_resource",
+        action="resource_deleted",
         resource_id=str(resource.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"resource_name": resource.name},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "resource_name": resource.name,
+        },
     )
 
 
@@ -495,6 +538,7 @@ def list_permissions(
 
 @router.post("/permissions", response_model=PermissionRead, tags=["identity"])
 def create_permission(
+    request: Request,
     permission_in: PermissionCreate,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -534,12 +578,16 @@ def create_permission(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="create_permission",
+        action="permission_created",
         resource_id=str(new_permission.id),
         decision="PERMIT",
         permission_id=str(new_permission.id),
         deny_reason=None,
-        context_snapshot={"action": permission_in.action},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "action": permission_in.action,
+        },
     )
     return new_permission
 
@@ -565,6 +613,7 @@ def get_permission(
     "/permissions/{permission_id}", response_model=PermissionRead, tags=["identity"]
 )
 def update_permission(
+    request: Request,
     permission_id: str,
     permission_in: PermissionUpdate,
     db: Session = Depends(get_db),
@@ -588,12 +637,16 @@ def update_permission(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="update_permission",
+        action="permission_updated",
         resource_id=str(permission.id),
         decision="PERMIT",
         permission_id=str(permission.id),
         deny_reason=None,
-        context_snapshot={"action": permission.action},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "action": permission.action,
+        },
     )
     return permission
 
@@ -604,6 +657,7 @@ def update_permission(
     tags=["identity"],
 )
 def delete_permission(
+    request: Request,
     permission_id: str,
     db: Session = Depends(get_db),
     payload: dict = Depends(_admin_required),
@@ -625,18 +679,23 @@ def delete_permission(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="delete_permission",
+        action="permission_deleted",
         resource_id=str(permission.id),
         decision="PERMIT",
         permission_id=str(permission.id),
         deny_reason=None,
-        context_snapshot={"action": permission.action},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "action": permission.action,
+        },
     )
 
 
 # ===== User-Role Assignment =====
 @router.post("/users/{user_id}/roles", response_model=UserRead, tags=["identity"])
 def assign_role_to_user(
+    request: Request,
     user_id: str,
     assignment: AssignRoleToUser,
     db: Session = Depends(get_db),
@@ -674,12 +733,16 @@ def assign_role_to_user(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="assign_role_to_user",
+        action="role_assigned",
         resource_id=str(user.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"role_id": str(assignment.role_id)},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "role_id": str(assignment.role_id),
+        },
     )
     return user
 
@@ -690,6 +753,7 @@ def assign_role_to_user(
     tags=["identity"],
 )
 def remove_role_from_user(
+    request: Request,
     user_id: str,
     role_id: str,
     db: Session = Depends(get_db),
@@ -718,18 +782,23 @@ def remove_role_from_user(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="remove_role_from_user",
+        action="role_removed",
         resource_id=str(user.id),
         decision="PERMIT",
         permission_id=None,
         deny_reason=None,
-        context_snapshot={"role_id": role_id},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "role_id": role_id,
+        },
     )
 
 
 # ===== Role-Permission Assignment =====
 @router.post("/roles/{role_id}/permissions", response_model=RoleRead, tags=["identity"])
 def assign_permission_to_role(
+    request: Request,
     role_id: str,
     assignment: AssignPermissionToRole,
     db: Session = Depends(get_db),
@@ -769,12 +838,16 @@ def assign_permission_to_role(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="assign_permission_to_role",
+        action="permission_assigned",
         resource_id=str(role.id),
         decision="PERMIT",
         permission_id=str(assignment.permission_id),
         deny_reason=None,
-        context_snapshot={"permission_id": str(assignment.permission_id)},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "permission_id": str(assignment.permission_id),
+        },
     )
     return role
 
@@ -785,6 +858,7 @@ def assign_permission_to_role(
     tags=["identity"],
 )
 def remove_permission_from_role(
+    request: Request,
     role_id: str,
     permission_id: str,
     db: Session = Depends(get_db),
@@ -813,10 +887,14 @@ def remove_permission_from_role(
     log_audit_event(
         db=db,
         user_id=payload.get("sub"),
-        action="remove_permission_from_role",
+        action="permission_removed",
         resource_id=str(role.id),
         decision="PERMIT",
         permission_id=str(permission_id),
         deny_reason=None,
-        context_snapshot={"permission_id": permission_id},
+        context_snapshot={
+            "ip_address": request.client.host if request.client else "unknown",
+            "client_type": request.headers.get("User-Agent", "unknown"),
+            "permission_id": permission_id,
+        },
     )

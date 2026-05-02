@@ -9,12 +9,40 @@
     {% extends "base.html" %} {% block content %}
     <h2>Роли</h2>
     <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+
+    {% if request.query_params.get('success') %}
+    <div
+      style="
+        padding: 10px;
+        background: #d4edda;
+        color: #155724;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      "
+    >
+      ✅ {{ request.query_params.get('success') }}
+    </div>
+    {% endif %} {% if request.query_params.get('error') %}
+    <div
+      style="
+        padding: 10px;
+        background: #f8d7da;
+        color: #721c24;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      "
+    >
+      ❌ {{ request.query_params.get('error') }}
+    </div>
+    {% endif %}
+
     <table>
       <thead>
         <tr>
           <th>ID</th>
           <th>Название</th>
           <th>Описание</th>
+          <th>Действия</th>
         </tr>
       </thead>
       <tbody>
@@ -23,13 +51,26 @@
           <td>{{ role.id }}</td>
           <td>{{ role.name }}</td>
           <td>{{ role.description or "" }}</td>
+          <td>
+            <a href="/admin/roles/{{ role.id }}/edit">Редактировать</a> |
+            <form
+              method="post"
+              action="/admin/roles/{{ role.id }}/delete"
+              style="display: inline"
+            >
+              <button type="submit" onclick="return confirm('Вы уверены?');">
+                Удалить
+              </button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <p><a href="/admin/roles/create">Добавить роль</a></p>
     <p>
-      Здесь отображаются все роли системы. Вы можете просматривать их детали и
-      управлять ролями через соответствующие действия.
+      Здесь отображаются все роли системы. Роли, назначенные пользователям,
+      нельзя удалить.
     </p>
     {% endblock %}
   </body>

@@ -203,7 +203,6 @@ class AuditEvent(Base):
     action: Mapped[str] = mapped_column(String(100), nullable=False)
     resource_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("resources.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )

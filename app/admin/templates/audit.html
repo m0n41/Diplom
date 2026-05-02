@@ -1,44 +1,54 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>{% block title %}Admin – Audit Log{% endblock %}</title>
-    <link rel="stylesheet" href="/static/admin.css" />
-  </head>
-  <body>
-    {% extends "base.html" %} {% block content %}
-    <h2>Журнал аудита</h2>
-    <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Время</th>
-          <th>Пользователь</th>
-          <th>Действие</th>
-          <th>Ресурс</th>
-          <th>Решение</th>
-          <th>Причина отказа</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ev in events %}
-        <tr>
-          <td>{{ ev.id }}</td>
-          <td>{{ ev.timestamp }}</td>
-          <td>{{ ev.user_id }}</td>
-          <td>{{ ev.action }}</td>
-          <td>{{ ev.resource_id or "" }}</td>
-          <td>{{ ev.decision }}</td>
-          <td>{{ ev.deny_reason or "" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <p>
-      Журнал аудита фиксирует все действия пользователей и системные события.
-      Используйте его для анализа безопасности и отладки.
-    </p>
-    {% endblock %}
-  </body>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>{% block title %}Админ &ndash; Журнал аудита{% endblock %}</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>Журнал аудита</h2>
+<p><a class="admin-return-button" href="/admin/">&larr; Вернуться в панель</a></p>
+
+<form method="get" action="/admin/audit" style="margin-bottom:20px;padding:15px;border:1px solid #ddd;background:#f9f9f9;">
+<div style="display:flex;gap:15px;flex-wrap:wrap;align-items:flex-end;">
+<div><label>Дата от:</label><br/><input type="date" name="date_from" value="{{ date_from }}"/></div>
+<div><label>Дата до:</label><br/><input type="date" name="date_to" value="{{ date_to }}"/></div>
+<div><label>Пользователь (ID):</label><br/><input type="text" name="user_id" value="{{ user_id }}" placeholder="UUID пользователя" style="width:250px"/></div>
+<div><label>Решение:</label><br/>
+<select name="decision">
+<option value="" {% if not decision %}selected{% endif %}>Все</option>
+<option value="PERMIT" {% if decision == 'PERMIT' %}selected{% endif %}>PERMIT</option>
+<option value="DENY" {% if decision == 'DENY' %}selected{% endif %}>DENY</option>
+</select>
+</div>
+<div><label>Действие:</label><br/><input type="text" name="action" value="{{ action }}" placeholder="user_created, role_deleted..." style="width:200px"/></div>
+<div><button type="submit">Фильтровать</button><a href="/admin/audit" style="margin-left:10px">Сбросить</a></div>
+</div>
+</form>
+
+<table>
+<thead>
+<tr><th>Время</th><th>Пользователь</th><th>Действие</th><th>Ресурс</th><th>Решение</th><th>Причина отказа</th><th>IP адрес</th></tr>
+</thead>
+<tbody>
+{% for ev in events %}
+<tr>
+<td><a href="/admin/audit/{{ ev.id }}">{{ ev.timestamp | msk_time }}</a></td>
+<td>{{ ev.user_id or "&mdash;" }}</td>
+<td>{{ ev.action }}</td>
+<td>{{ ev.resource_id or "&mdash;" }}</td>
+<td>{% if ev.decision == 'PERMIT' %}<span style="color:green;font-weight:bold">PERMIT</span>{% else %}<span style="color:red;font-weight:bold">DENY</span>{% endif %}</td>
+<td>{{ ev.deny_reason or "&mdash;" }}</td>
+<td>{{ ev.ip_address or "&mdash;" }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+<div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;">
+<div>Показано {{ events|length }} из {{ total }} записей
+{% if page > 1 %}<a href="/admin/audit?page={{ page - 1 }}&per_page={{ per_page }}&user_id={{ user_id }}&decision={{ decision }}&action={{ action }}&date_from={{ date_from }}&date_to={{ date_to }}">&larr; Назад</a>{% endif %}
+{% if page * per_page < total %}<a href="/admin/audit?page={{ page + 1 }}&per_page={{ per_page }}&user_id={{ user_id }}&decision={{ decision }}&action={{ action }}&date_from={{ date_from }}&date_to={{ date_to }}">Вперед &rarr;</a>{% endif %}
+</div>
+<div>Страница {{ page }}</div>
+</div>
+{% endblock %}
+</body>
 </html>

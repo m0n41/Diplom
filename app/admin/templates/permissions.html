@@ -9,29 +9,75 @@
     {% extends "base.html" %} {% block content %}
     <h2>Права</h2>
     <p><a class="admin-return-button" href="/admin/">Вернуться в панель</a></p>
+
+    {% if request.query_params.get('success') %}
+    <div
+      style="
+        padding: 10px;
+        background: #d4edda;
+        color: #155724;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      "
+    >
+      ✅ {{ request.query_params.get('success') }}
+    </div>
+    {% endif %} {% if request.query_params.get('error') %}
+    <div
+      style="
+        padding: 10px;
+        background: #f8d7da;
+        color: #721c24;
+        margin-bottom: 15px;
+        border-radius: 4px;
+      "
+    >
+      ❌ {{ request.query_params.get('error') }}
+    </div>
+    {% endif %}
+
     <table>
       <thead>
         <tr>
           <th>ID</th>
-          <th>Имя</th>
-          <th>Описание</th>
+          <th>Действие</th>
           <th>Ресурс</th>
+          <th>Назначено ролям</th>
+          <th>Описание</th>
+          <th>Действия</th>
         </tr>
       </thead>
       <tbody>
         {% for perm in permissions %}
         <tr>
           <td>{{ perm.id }}</td>
-          <td>{{ perm.name }}</td>
+          <td>{{ perm.action }}</td>
+          <td>{{ perm.resource_name }}</td>
+          <td>{{ perm.role_count }}</td>
           <td>{{ perm.description or "" }}</td>
-          <td>{{ perm.resource_id or "" }}</td>
+          <td>
+            {% if perm.role_count == 0 %}
+            <a href="/admin/permissions/{{ perm.id }}/edit">Редактировать</a> |
+            {% else %} <span style="color: #999">Редактировать</span> | {% endif
+            %}
+            <form
+              method="post"
+              action="/admin/permissions/{{ perm.id }}/delete"
+              style="display: inline"
+            >
+              <button type="submit" onclick="return confirm('Вы уверены?');">
+                Удалить
+              </button>
+            </form>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <p><a href="/admin/permissions/create">Добавить право</a></p>
     <p>
-      Эта страница показывает все права доступа. Вы можете просматривать и
-      изменять их, назначая ресурсы и описания.
+      Эта страница показывает все права доступа. Права, назначенные ролям,
+      нельзя редактировать или удалить.
     </p>
     {% endblock %}
   </body>

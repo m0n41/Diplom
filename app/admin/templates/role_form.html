@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ru">
+<head><meta charset="UTF-8" /><title>{% if role %}Редактировать роль{% else %}Создать роль{% endif %}</title><link rel="stylesheet" href="/static/admin.css" /></head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>{% if role %}Редактировать роль{% else %}Создать роль{% endif %}</h2>
+<p><a class="admin-return-button" href="/admin/roles">&larr; Назад к списку</a></p>
+
+{% if request.query_params.get('error') %}
+<div style="padding:10px;background:#f8d7da;color:#721c24;margin-bottom:15px;border-radius:4px;">&#10060; {{ request.query_params.get('error') }}</div>
+{% endif %}
+
+<form method="post" action="{% if role %}/admin/roles/{{ role.id }}/edit{% else %}/admin/roles/create{% endif %}">
+<label for="name">Название:</label><br/>
+<input type="text" id="name" name="name" required value="{{ role.name if role else '' }}"/><br/><br/>
+
+<label for="description">Описание:</label><br/>
+<textarea id="description" name="description" rows="4" cols="50">{{ role.description if role else '' }}</textarea><br/><br/>
+
+{% if role %}
+<fieldset style="border:1px solid #ccc;padding:10px;margin-bottom:15px;">
+<legend><strong>Назначенные права</strong></legend>
+{% if all_permissions %}
+{% set current_res = namespace(value='') %}
+{% for perm in all_permissions %}
+{% if perm.resource_name != current_res.value %}
+{% if not loop.first %}<br/>{% endif %}
+<strong style="display:block;margin-top:10px;color:#333;">{{ perm.resource_name }}</strong>
+{% set current_res.value = perm.resource_name %}
+{% endif %}
+<label style="display:block;margin:3px 0 3px 15px;">
+<input type="checkbox" name="permission_ids" value="{{ perm.id }}" {% if perm.id|string in role_perm_ids %}checked{% endif %}/>
+{{ perm.action }}{% if perm.description %} <small style="color:#666;">({{ perm.description }})</small>{% endif %}
+</label>
+{% endfor %}
+{% else %}
+<p style="color:#999;">Нет доступных прав. <a href="/admin/permissions/create">Создать право</a></p>
+{% endif %}
+</fieldset>
+{% endif %}
+
+<button type="submit">{% if role %}Сохранить изменения{% else %}Создать{% endif %}</button>
+</form>
+{% endblock %}
+</body>
+</html>

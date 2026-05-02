@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>{% block title %}Админ &ndash; Детали события{% endblock %}</title>
+<link rel="stylesheet" href="/static/admin.css" />
+<style>
+.detail-table { width:100%; border-collapse:collapse; }
+.detail-table th, .detail-table td { border:1px solid #cccccc; padding:10px; text-align:left; }
+.detail-table th { background: #285c9b; width:200px; }
+.detail-table pre { background: #f5f5f5; padding:10px; border-radius:4px; overflow-x:auto; font-family:monospace; }
+</style>
+</head>
+<body>
+{% extends "base.html" %}{% block content %}
+<h2>Детали события аудита</h2>
+<p><a class="admin-return-button" href="/admin/audit">&larr; Вернуться к журналу</a></p>
+
+<table class="detail-table">
+<tbody>
+<tr><th>ID</th><td>{{ ev.id }}</td></tr>
+<tr><th>Время</th><td>{{ ev.timestamp | msk_time }}</td></tr>
+<tr><th>Пользователь</th><td>{{ ev.user_id or "—" }}</td></tr>
+<tr><th>Действие</th><td>{{ ev.action }}</td></tr>
+<tr><th>Ресурс</th><td>{{ ev.resource_id or "—" }}</td></tr>
+<tr><th>Решение</th><td>{% if ev.decision == 'PERMIT' %}<span style="color:green;font-weight:bold">PERMIT</span>{% else %}<span style="color:red;font-weight:bold">DENY</span>{% endif %}</td></tr>
+<tr><th>Причина отказа</th><td>{{ ev.deny_reason or "—" }}</td></tr>
+<tr><th>IP‑адрес</th><td>{{ ev.ip_address or "—" }}</td></tr>
+<tr><th>Тип клиента</th><td>{{ ev.client_type or "—" }}</td></tr>
+<tr><th>Контекст (JSON)</th><td><pre>{{ context_formatted }}</pre></td></tr>
+</tbody>
+</table>
+{% endblock %}
+</body>
+</html>
