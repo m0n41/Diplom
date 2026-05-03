@@ -145,7 +145,26 @@ def demo_login(
     db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.username == username).first()
+    client_ip = request.client.host if request.client else "unknown"
+    client_type = request.headers.get("User-Agent", "unknown")
+
     if not user or not verify_password(password, user.password_hash):
+        # Аудит неудачной попытки входа
+        if user:
+            log_audit_event(
+                db=db,
+                user_id=str(user.id),
+                action="login",
+                resource_id=None,
+                decision="DENY",
+                permission_id=None,
+                deny_reason="Invalid credentials",
+                context_snapshot={
+                    "ip_address": client_ip,
+                    "client_type": client_type,
+                    "username": username,
+                },
+            )
         return RedirectResponse(
             url="/demo/login?error=Invalid+credentials", status_code=302
         )
@@ -155,13 +174,51 @@ def demo_login(
         "roles": [{"name": r.name} for r in user.roles],
     }
     access_token = create_access_token(subject)
+
+    # Аудит успешного входа
+    log_audit_event(
+        db=db,
+        user_id=str(user.id),
+        action="login",
+        resource_id=None,
+        decision="PERMIT",
+        permission_id=None,
+        deny_reason=None,
+        context_snapshot={
+            "ip_address": client_ip,
+            "client_type": client_type,
+            "username": username,
+        },
+    )
+
     response = RedirectResponse(url="/demo", status_code=302)
     response.set_cookie(key="access_token", value=access_token, httponly=True, path="/")
     return response
 
 
 @router.get("/logout")
-def demo_logout(request: Request):
+def demo_logout(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get("access_token")
+    client_ip = request.client.host if request.client else "unknown"
+    client_type = request.headers.get("User-Agent", "unknown")
+
+    if token:
+        payload = verify_token(token)
+        if payload:
+            log_audit_event(
+                db=db,
+                user_id=payload.get("sub"),
+                action="logout",
+                resource_id=None,
+                decision="PERMIT",
+                permission_id=None,
+                deny_reason=None,
+                context_snapshot={
+                    "ip_address": client_ip,
+                    "client_type": client_type,
+                },
+            )
+
     response = RedirectResponse(url="/demo/login", status_code=302)
     response.delete_cookie(key="access_token", path="/")
     return response

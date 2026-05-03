@@ -91,7 +91,21 @@ def admin_login_page(request: Request):
 
 
 @router.get("/logout", tags=["admin"])
-def admin_logout():
+def admin_logout(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get("access_token")
+    if token:
+        payload = verify_token(token)
+        if payload:
+            log_audit_event(
+                db=db,
+                user_id=payload.get("sub"),
+                action="logout",
+                resource_id=None,
+                decision="PERMIT",
+                permission_id=None,
+                deny_reason=None,
+                context_snapshot=_audit_ctx(request),
+            )
     response = RedirectResponse(
         url="/admin/login", status_code=status.HTTP_303_SEE_OTHER
     )
@@ -103,18 +117,43 @@ def admin_logout():
 # Admin login submit
 @router.post("/login", tags=["admin"])
 def admin_login_submit(
+    request: Request,
     username: str = Form(...),
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
     user = db.query(User).filter(User.username == username).first()
+    client_ip = request.client.host if request.client else "unknown"
+    client_type = request.headers.get("User-Agent", "unknown")
+
     if not user or not verify_password(password, user.password_hash):
+        if user:
+            log_audit_event(
+                db=db,
+                user_id=str(user.id),
+                action="login",
+                resource_id=None,
+                decision="DENY",
+                permission_id=None,
+                deny_reason="Invalid credentials",
+                context_snapshot=_audit_ctx(request, {"username": username}),
+            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:
+        log_audit_event(
+            db=db,
+            user_id=str(user.id),
+            action="login",
+            resource_id=None,
+            decision="DENY",
+            permission_id=None,
+            deny_reason="User is inactive",
+            context_snapshot=_audit_ctx(request, {"username": username}),
+        )
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="User is inactive",
@@ -122,6 +161,18 @@ def admin_login_submit(
     subject = {"sub": str(user.id), "roles": [{"name": r.name} for r in user.roles]}
     access_token = create_access_token(subject)
     refresh_token = create_refresh_token(subject)
+
+    log_audit_event(
+        db=db,
+        user_id=str(user.id),
+        action="login",
+        resource_id=None,
+        decision="PERMIT",
+        permission_id=None,
+        deny_reason=None,
+        context_snapshot=_audit_ctx(request, {"username": username}),
+    )
+
     response = RedirectResponse(url="/admin/", status_code=status.HTTP_303_SEE_OTHER)
     response.set_cookie(
         key="access_token",
